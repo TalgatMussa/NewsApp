@@ -40,6 +40,11 @@ class ArticleFragment: Fragment() {
             webViewClient = WebViewClient()
             loadUrl(article.url)
         }
+
+        binding.fab.setOnClickListener {
+            viewModel.saveArticle(article)
+            Snackbar.make(view, "Article saved successfully", Snackbar.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroyView() {
