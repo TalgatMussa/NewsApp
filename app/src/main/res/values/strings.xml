@@ -3,4 +3,7 @@
     <string name="bot_menu_saved_news">Saved News</string>
     <string name="bot_menu_breaking_news">Breaking News</string>
     <string name="bot_menu_search_news">Search News</string>
+    <string name="article_saved">Article saved successfully</string>
+    <string name="article_deleted">Successfully deleted article</string>
+    <string name="undo">Undo</string>
 </resources>

@@ -16,8 +16,11 @@ import com.example.newsapp.adapters.NewsAdapter
 import com.example.newsapp.db.ArticleDatabase
 import com.example.newsapp.models.Article
 import com.example.newsapp.repository.NewsRepository
+import com.example.newsapp.ui.NewsApplication
 import com.example.newsapp.ui.NewsViewModel
 import com.example.newsapp.ui.NewsViewModelProviderFactory
+import com.example.newsapp.util.FragmentConstants
+import com.example.newsapp.util.FragmentConstants.Companion.KEY_ARTICLE
 import com.example.newsapp.util.Resource
 
 class BreakingNewsFragment : Fragment() {
@@ -27,8 +30,8 @@ class BreakingNewsFragment : Fragment() {
     private lateinit var newsAdapter: NewsAdapter
     private val TAG = "BreakingNewsFragment"
 
-    val viewModel: NewsViewModel by activityViewModels() {
-        NewsViewModelProviderFactory(NewsRepository(ArticleDatabase.getDatabase(requireContext())))
+    val viewModel: NewsViewModel by activityViewModels {
+        NewsViewModelProviderFactory(NewsRepository((activity?.application as NewsApplication).database))
     }
 
     override fun onCreateView(
@@ -75,13 +78,14 @@ class BreakingNewsFragment : Fragment() {
         binding.rvBreakingNews.apply {
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
+            setHasFixedSize(true)
         }
     }
 
     private fun onItemClick(article: Article) {
         findNavController().navigate(
             R.id.action_breakingNewsFragment_to_articleFragment,
-            bundleOf("article" to article)
+            bundleOf(KEY_ARTICLE to article)
         )
     }
 

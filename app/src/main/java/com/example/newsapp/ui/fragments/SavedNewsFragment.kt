@@ -17,8 +17,11 @@ import com.example.newsapp.databinding.FragmentSavedNewsBinding
 import com.example.newsapp.db.ArticleDatabase
 import com.example.newsapp.models.Article
 import com.example.newsapp.repository.NewsRepository
+import com.example.newsapp.ui.NewsApplication
 import com.example.newsapp.ui.NewsViewModel
 import com.example.newsapp.ui.NewsViewModelProviderFactory
+import com.example.newsapp.util.FragmentConstants
+import com.example.newsapp.util.FragmentConstants.Companion.KEY_ARTICLE
 import com.google.android.material.snackbar.Snackbar
 
 class SavedNewsFragment: Fragment() {
@@ -26,8 +29,8 @@ class SavedNewsFragment: Fragment() {
     private val binding get() = _binding!!
     private lateinit var newsAdapter: NewsAdapter
 
-    val viewModel: NewsViewModel by activityViewModels() {
-        NewsViewModelProviderFactory(NewsRepository(ArticleDatabase.getDatabase(requireContext())))
+    val viewModel: NewsViewModel by activityViewModels {
+        NewsViewModelProviderFactory(NewsRepository((activity?.application as NewsApplication).database))
     }
 
     override fun onCreateView(
@@ -60,8 +63,8 @@ class SavedNewsFragment: Fragment() {
                 val position = viewHolder.adapterPosition
                 val article = newsAdapter.differ.currentList[position]
                 viewModel.deleteArticle(article)
-                Snackbar.make(view, "Successfully deleted article", Snackbar.LENGTH_LONG).apply {
-                    setAction("Undo") {
+                Snackbar.make(view, getString(R.string.article_deleted), Snackbar.LENGTH_LONG).apply {
+                    setAction(getString(R.string.undo)) {
                         viewModel.saveArticle(article)
                     }
                     show()
@@ -88,13 +91,14 @@ class SavedNewsFragment: Fragment() {
         binding.rvSavedNews.apply {
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
+            setHasFixedSize(true)
         }
     }
 
     private fun onItemClick(article: Article) {
         findNavController().navigate(
             R.id.action_savedNewsFragment_to_articleFragment,
-            bundleOf("article" to article)
+            bundleOf(KEY_ARTICLE to article)
         )
     }
 }

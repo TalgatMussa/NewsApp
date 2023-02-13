@@ -8,9 +8,11 @@ import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
+import com.example.newsapp.R
 import com.example.newsapp.databinding.FragmentArticleBinding
 import com.example.newsapp.db.ArticleDatabase
 import com.example.newsapp.repository.NewsRepository
+import com.example.newsapp.ui.NewsApplication
 import com.example.newsapp.ui.NewsViewModel
 import com.example.newsapp.ui.NewsViewModelProviderFactory
 import com.google.android.material.snackbar.Snackbar
@@ -20,8 +22,8 @@ class ArticleFragment: Fragment() {
     private val binding get() = _binding!!
     private val args: ArticleFragmentArgs by navArgs()
 
-    val viewModel: NewsViewModel by activityViewModels() {
-        NewsViewModelProviderFactory(NewsRepository(ArticleDatabase.getDatabase(requireContext())))
+    val viewModel: NewsViewModel by activityViewModels {
+        NewsViewModelProviderFactory(NewsRepository((activity?.application as NewsApplication).database))
     }
 
     override fun onCreateView(
@@ -43,7 +45,7 @@ class ArticleFragment: Fragment() {
 
         binding.fab.setOnClickListener {
             viewModel.saveArticle(article)
-            Snackbar.make(view, "Article saved successfully", Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(view, getString(R.string.article_saved), Snackbar.LENGTH_SHORT).show()
         }
     }
 

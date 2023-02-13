@@ -17,9 +17,11 @@ import com.example.newsapp.databinding.FragmentSearchNewsBinding
 import com.example.newsapp.db.ArticleDatabase
 import com.example.newsapp.models.Article
 import com.example.newsapp.repository.NewsRepository
+import com.example.newsapp.ui.NewsApplication
 import com.example.newsapp.ui.NewsViewModel
 import com.example.newsapp.ui.NewsViewModelProviderFactory
 import com.example.newsapp.util.Constants.Companion.SEARCH_NEWS_TIME_DELAY
+import com.example.newsapp.util.FragmentConstants.Companion.KEY_ARTICLE
 import com.example.newsapp.util.Resource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -30,8 +32,8 @@ class SearchNewsFragment: Fragment() {
     private var _binding: FragmentSearchNewsBinding? = null
     private val binding get() = _binding!!
 
-    val viewModel: NewsViewModel by activityViewModels() {
-        NewsViewModelProviderFactory(NewsRepository(ArticleDatabase.getDatabase(requireContext())))
+    val viewModel: NewsViewModel by activityViewModels {
+        NewsViewModelProviderFactory(NewsRepository((activity?.application as NewsApplication).database))
     }
 
     lateinit var newsAdapter: NewsAdapter
@@ -54,7 +56,6 @@ class SearchNewsFragment: Fragment() {
         var job: Job? = null
         binding.etSearch.addTextChangedListener { editable ->
             job?.cancel()
-            // MainScope() - coroutine dispatcher main
             job = MainScope().launch {
                 delay(SEARCH_NEWS_TIME_DELAY)
                 editable?.let {
@@ -104,13 +105,14 @@ class SearchNewsFragment: Fragment() {
         binding.rvSearchNews.apply {
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
+            setHasFixedSize(true)
         }
     }
 
     private fun onItemClick(article: Article) {
         findNavController().navigate(
             R.id.action_searchNewsFragment_to_articleFragment,
-            bundleOf("article" to article)
+            bundleOf(KEY_ARTICLE to article)
         )
     }
 }
