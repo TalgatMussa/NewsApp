@@ -1,25 +1,25 @@
-package com.example.newsapp.ui
+package com.example.newsapp.ui.fragments.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.newsapp.models.Article
-import com.example.newsapp.models.NewsResponse
-import com.example.newsapp.repository.NewsRepository
-import com.example.newsapp.util.Resource
+import com.example.newsapp.data.models.Article
+import com.example.newsapp.data.models.NewsResponse
+import com.example.newsapp.data.repository.Repository
+import com.example.newsapp.utils.Resource
 import kotlinx.coroutines.launch
 import retrofit2.Response
 
 class NewsViewModel(
-    val newsRepository: NewsRepository
+    private val repository: Repository
 ) : ViewModel() {
 
     private val _breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     val breakingNews: LiveData<Resource<NewsResponse>> = _breakingNews
     var breakingNewsPage = 1
 
-    val _searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
+    private val _searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     val searchNews: LiveData<Resource<NewsResponse>> = _searchNews
     var searchNewsPage = 1
 
@@ -29,13 +29,13 @@ class NewsViewModel(
 
     fun getBreakingNews(countryCode: String) = viewModelScope.launch {
         _breakingNews.postValue(Resource.Loading())
-        val response = newsRepository.getBreakingNews(countryCode, breakingNewsPage)
+        val response = repository.getBreakingNews(countryCode, breakingNewsPage)
         _breakingNews.postValue(handleBreakingNewsResponse(response))
     }
 
     fun searchNews(searchQuery: String) = viewModelScope.launch {
         _searchNews.postValue(Resource.Loading())
-        val response = newsRepository.searchNews(searchQuery, searchNewsPage)
+        val response = repository.searchNews(searchQuery, searchNewsPage)
         _searchNews.postValue(handleSearchNewsResponse(response))
     }
 
@@ -58,12 +58,12 @@ class NewsViewModel(
     }
 
     fun saveArticle(article: Article) = viewModelScope.launch {
-        newsRepository.upsert(article)
+        repository.upsert(article)
     }
 
-    fun getSavedNews() = newsRepository.getSavedNews()
+    fun getSavedNews() = repository.getSavedNews()
 
     fun deleteArticle(article: Article) = viewModelScope.launch {
-        newsRepository.deleteArticle(article)
+        repository.deleteArticle(article)
     }
 }

@@ -1,4 +1,4 @@
-package com.example.newsapp.adapters
+package com.example.newsapp.ui.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.newsapp.R
 import com.example.newsapp.databinding.ItemArticlePreviewBinding
-import com.example.newsapp.models.Article
+import com.example.newsapp.data.models.Article
 
 class NewsAdapter (
     val onItemClickListener: (article: Article) -> Unit
@@ -25,9 +25,7 @@ class NewsAdapter (
         )
     }
 
-    override fun getItemCount(): Int {
-        return differ.currentList.size
-    }
+    override fun getItemCount(): Int = differ.currentList.size
 
     override fun onBindViewHolder(holder: ArticleViewHolder, position: Int) {
         val article = differ.currentList[position]
@@ -38,7 +36,7 @@ class NewsAdapter (
         val binding = ItemArticlePreviewBinding.bind(itemView)
 
         fun bind(article: Article) = with(binding) {
-            tvSource.text = article.source.name
+            tvSource.text = article.source?.name
             tvTitle.text = article.title
             tvDescription.text = article.description
             tvPublishedAt.text = article.publishedAt

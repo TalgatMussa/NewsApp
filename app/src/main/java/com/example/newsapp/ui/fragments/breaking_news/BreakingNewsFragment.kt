@@ -1,8 +1,7 @@
-package com.example.newsapp.ui.fragments
+package com.example.newsapp.ui.fragments.breaking_news
 
-import com.example.newsapp.databinding.FragmentBreakingNewsBinding
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,27 +10,29 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.newsapp.NewsApplication.Companion.applicationComponent
 import com.example.newsapp.R
-import com.example.newsapp.adapters.NewsAdapter
-import com.example.newsapp.db.ArticleDatabase
-import com.example.newsapp.models.Article
-import com.example.newsapp.repository.NewsRepository
-import com.example.newsapp.ui.NewsApplication
-import com.example.newsapp.ui.NewsViewModel
-import com.example.newsapp.ui.NewsViewModelProviderFactory
-import com.example.newsapp.util.FragmentConstants
-import com.example.newsapp.util.FragmentConstants.Companion.KEY_ARTICLE
-import com.example.newsapp.util.Resource
+import com.example.newsapp.data.models.Article
+import com.example.newsapp.databinding.FragmentBreakingNewsBinding
+import com.example.newsapp.ui.adapters.NewsAdapter
+import com.example.newsapp.ui.fragments.viewmodel.NewsViewModel
+import com.example.newsapp.ui.fragments.viewmodel.NewsViewModelProviderFactory
+import com.example.newsapp.utils.FragmentConstants.Companion.KEY_ARTICLE
+import com.example.newsapp.utils.Resource
+import javax.inject.Inject
 
 class BreakingNewsFragment : Fragment() {
+
+    @Inject lateinit var newsViewModelProviderFactory: NewsViewModelProviderFactory
 
     private var _binding: FragmentBreakingNewsBinding? = null
     private val binding get() = _binding!!
     private lateinit var newsAdapter: NewsAdapter
-    private val TAG = "BreakingNewsFragment"
+    private val viewModel: NewsViewModel by activityViewModels { newsViewModelProviderFactory }
 
-    val viewModel: NewsViewModel by activityViewModels {
-        NewsViewModelProviderFactory(NewsRepository((activity?.application as NewsApplication).database))
+    override fun onAttach(context: Context) {
+        applicationComponent.inject(this)
+        super.onAttach(context)
     }
 
     override fun onCreateView(
@@ -46,26 +47,7 @@ class BreakingNewsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
-
-        viewModel.breakingNews.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Resource.Success -> {
-                    hideProgressBar()
-                    response.data?.let { newsResponse ->
-                        newsAdapter.differ.submitList(newsResponse.articles)
-                    }
-                }
-                is Resource.Error -> {
-                    hideProgressBar()
-                    response.message?.let { message ->
-                        Log.e(TAG, "An error occurred: $message")
-                    }
-                }
-                is Resource.Loading -> {
-                    showProgressBar()
-                }
-            }
-        }
+        setupBreakingNewsObserver()
     }
 
     override fun onDestroyView() {
@@ -74,7 +56,7 @@ class BreakingNewsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        newsAdapter = NewsAdapter {article -> onItemClick(article)}
+        newsAdapter = NewsAdapter { article -> onItemClick(article) }
         binding.rvBreakingNews.apply {
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
@@ -95,5 +77,27 @@ class BreakingNewsFragment : Fragment() {
 
     private fun showProgressBar() {
         binding.paginationProgressBar.visibility = View.VISIBLE
+    }
+
+    private fun setupBreakingNewsObserver() {
+        viewModel.breakingNews.observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Resource.Success -> {
+                    hideProgressBar()
+                    response.data?.let { newsResponse ->
+                        newsAdapter.differ.submitList(newsResponse.articles)
+                    }
+                }
+                is Resource.Error -> {
+                    hideProgressBar()
+                    response.message?.let { message ->
+
+                    }
+                }
+                is Resource.Loading -> {
+                    showProgressBar()
+                }
+            }
+        }
     }
 }
